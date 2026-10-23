@@ -41,11 +41,8 @@ contract ScaffoldETHDeploy is Script {
         (, address _deployer,) = vm.readCallers();
 
         if (block.chainid == 31337 && _deployer.balance == 0) {
-            try this.anvil_setBalance(_deployer, ANVIL_BASE_BALANCE) {
-                emit AnvilSetBalance(_deployer, ANVIL_BASE_BALANCE);
-            } catch {
-                emit FailedAnvilRequest();
-            }
+            anvilSetBalance(_deployer, ANVIL_BASE_BALANCE);
+            emit AnvilSetBalance(_deployer, ANVIL_BASE_BALANCE);
         }
         return _deployer;
     }
@@ -71,7 +68,7 @@ contract ScaffoldETHDeploy is Script {
 
         string memory chainName;
 
-        try this.getChain() returns (Chain memory chain) {
+        try vm.getChain(block.chainid) returns (Vm.Chain memory chain) {
             chainName = chain.name;
         } catch {
             chainName = findChainName();
@@ -84,7 +81,9 @@ contract ScaffoldETHDeploy is Script {
         return getChain(block.chainid);
     }
 
-    function anvil_setBalance(address addr, uint256 amount) public {
+    /// @dev Internal (bukan `this.anvil_setBalance`) supaya forge 1.8.6 tidak menolak
+    ///      "usage of address(this) detected in script contract".
+    function anvilSetBalance(address addr, uint256 amount) internal {
         string memory addressString = vm.toString(addr);
         string memory amountString = vm.toString(amount);
         string memory requestPayload = string.concat(
