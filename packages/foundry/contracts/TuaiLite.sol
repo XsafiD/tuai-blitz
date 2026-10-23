@@ -150,4 +150,140 @@ contract TuaiLite is ERC1155, Ownable, ReentrancyGuard {
             list[i] = series[seriesIds[i]];
         }
     }
+
+    // --- petani: pinjam, lunasi, kesehatan posisi ---
+
+    function borrow(uint256 seriesId, uint256 kg) external nonReentrant {
+        require(!loans[msg.sender].active, "loan active");
+        require(kg > 0, "kg 0");
+
+        Series storage s = series[seriesId];
+        require(s.active, "series inactive");
+
+        uint256 value = kg * s.pricePerKg;
+        uint256 principal = (value * MAX_LTV_BPS) / BPS_DENOMINATOR;
+        require(principal > 0, "principal 0");
+        require(idrx.balanceOf(address(this)) >= principal, "pool insufficient");
+
+        // Resi masuk escrow SEBELUM IDRX keluar.
+        _safeTransferFrom(msg.sender, address(this), seriesId, kg, "");
+
+        uint256 debt = (principal * (BPS_DENOMINATOR + INTEREST_BPS)) / BPS_DENOMINATOR;
+
+        totalOutstandingPrincipal += principal;
+        loans[msg.sender] = Loan({
+            seriesId: seriesId,
+            collateralKg: kg,
+            principal: principal,
+            debt: debt,
+            active: true
+        });
+
+        require(idrx.transfer(msg.sender, principal), "transfer failed");
+
+        emit Borrowed(msg.sender, seriesId, kg, principal);
+    }
+
+    function repay() external nonReentrant {
+        Loan memory loan = loans[msg.sender];
+        require(loan.active, "no loan");
+
+        require(idrx.transferFrom(msg.sender, address(this), loan.debt), "transfer failed");
+        _safeTransferFrom(address(this), msg.sender, loan.seriesId, loan.collateralKg, "");
+
+        totalOutstandingPrincipal -= loan.principal;
+        delete loans[msg.sender];
+
+        emit Repaid(msg.sender, loan.principal, loan.debt - loan.principal);
+    }
+
+    function maxBorrow(uint256 seriesId, uint256 kg) public view returns (uint256) {
+        return (kg * series[seriesId].pricePerKg * MAX_LTV_BPS) / BPS_DENOMINATOR;
+    }
+
+    function collateralValueOf(address user) public view returns (uint256) {
+        Loan memory loan = loans[user];
+        if (!loan.active) return 0;
+        return loan.collateralKg * series[loan.seriesId].pricePerKg;
+    }
+
+    function ltvBps(address user) public view returns (uint256) {
+        uint256 value = collateralValueOf(user);
+        if (value == 0) return 0;
+        return (loans[user].debt * BPS_DENOMINATOR) / value;
+    }
+
+    function isLiquidatable(address user) public view returns (bool) {
+        Loan memory loan = loans[user];
+        if (!loan.active) return false;
+        uint256 value = collateralValueOf(user);
+        return (loan.debt * BPS_DENOMINATOR) >= (value * LIQ_THRESHOLD_BPS);
+    }
+
+    // --- likuidasi: jaminan pindah ke seizedKg, tanpa kirim IDRX ---
+
+    function liquidate(address user) external nonReentrant {
+        Loan memory loan = loans[user];
+        require(loan.active, "no loan");
+        require(isLiquidatable(user), "not liquidatable");
+
+        seizedKg[loan.seriesId] += loan.collateralKg;
+        totalOutstandingPrincipal -= loan.principal;
+        delete loans[user];
+
+        emit Liquidated(user, loan.seriesId, loan.collateralKg, loan.debt);
+    }
+
+    // --- redemption: resi dibakar, kg fisik diambil ---
+
+    function redeem(uint256 seriesId, uint256 kg) external nonReentrant {
+        require(kg > 0, "kg 0");
+        require(balanceOf(msg.sender, seriesId) >= kg, "insufficient receipt");
+
+        _burn(msg.sender, seriesId, kg);
+        series[seriesId].redeemedKg += kg;
+
+        emit Redeemed(seriesId, msg.sender, kg);
+    }
+
+    // --- pool pemberi pinjaman ---
+
+    function totalAssets() public view returns (uint256) {
+        return idrx.balanceOf(address(this)) + totalOutstandingPrincipal;
+    }
+
+    /// @return harga satu share, 1e18 = 1.0
+    function sharePrice() public view returns (uint256) {
+        if (totalShares == 0) return 1e18;
+        return (totalAssets() * 1e18) / totalShares;
+    }
+
+    function deposit(uint256 amount) external nonReentrant {
+        require(amount > 0, "amount 0");
+        require(idrx.transferFrom(msg.sender, address(this), amount), "transfer failed");
+
+        // totalAssets() sudah termasuk `amount`, jadi kurangi dulu untuk share pertama.
+        uint256 s = totalShares == 0 ? amount : (amount * totalShares) / (totalAssets() - amount);
+
+        shares[msg.sender] += s;
+        totalShares += s;
+
+        emit PoolDeposit(msg.sender, amount, s);
+    }
+
+    function withdraw(uint256 shareAmount) external nonReentrant {
+        require(shareAmount > 0, "shares 0");
+        require(totalShares > 0, "no shares");
+        require(shares[msg.sender] >= shareAmount, "insufficient shares");
+
+        uint256 amount = (shareAmount * totalAssets()) / totalShares;
+        require(idrx.balanceOf(address(this)) >= amount, "pool illiquid");
+
+        shares[msg.sender] -= shareAmount;
+        totalShares -= shareAmount;
+
+        require(idrx.transfer(msg.sender, amount), "transfer failed");
+
+        emit PoolWithdraw(msg.sender, shareAmount, amount);
+    }
 }
