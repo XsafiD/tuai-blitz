@@ -81,4 +81,73 @@ contract TuaiLite is ERC1155, Ownable, ReentrancyGuard {
     {
         return 0xf23a6e61;
     }
+
+    // --- admin & gudang: seri resi ---
+
+    function setWarehouse(address w, bool allowed) external onlyOwner {
+        require(w != address(0), "zero warehouse");
+        isWarehouse[w] = allowed;
+    }
+
+    function createSeries(
+        string calldata receiptNo,
+        string calldata commodity,
+        string calldata grade,
+        address warehouse,
+        uint256 pricePerKg,
+        uint256 maxKg
+    ) external onlyOwner returns (uint256 id) {
+        require(pricePerKg > 0, "price 0");
+        require(maxKg > 0, "maxKg 0");
+
+        // id diambil dulu, baru increment: seriesIds mulai dari 1.
+        id = nextSeriesId;
+        nextSeriesId = id + 1;
+
+        series[id] = Series({
+            receiptNo: receiptNo,
+            commodity: commodity,
+            grade: grade,
+            warehouse: warehouse,
+            pricePerKg: pricePerKg,
+            maxKg: maxKg,
+            mintedKg: 0,
+            redeemedKg: 0,
+            active: true
+        });
+        seriesIds.push(id);
+
+        emit SeriesCreated(id, receiptNo, maxKg);
+    }
+
+    function mintReceipt(uint256 seriesId, address to, uint256 kg) external onlyWarehouse nonReentrant {
+        Series storage s = series[seriesId];
+        require(s.active, "series inactive");
+        require(isWarehouse[s.warehouse], "warehouse not allowed");
+        require(kg > 0, "kg 0");
+        require(s.mintedKg + kg <= s.maxKg, "over issuance");
+
+        s.mintedKg += kg;
+        _mint(to, seriesId, kg, "");
+
+        emit ReceiptMinted(seriesId, to, kg);
+    }
+
+    function setPrice(uint256 seriesId, uint256 newPricePerKg) external onlyOwner {
+        Series storage s = series[seriesId];
+        require(s.warehouse != address(0), "no series");
+        require(newPricePerKg > 0, "price 0");
+
+        uint256 oldPrice = s.pricePerKg;
+        s.pricePerKg = newPricePerKg;
+
+        emit PriceUpdated(seriesId, oldPrice, newPricePerKg);
+    }
+
+    function getSeries() external view returns (Series[] memory list) {
+        list = new Series[](seriesIds.length);
+        for (uint256 i = 0; i < seriesIds.length; i++) {
+            list[i] = series[seriesIds[i]];
+        }
+    }
 }
