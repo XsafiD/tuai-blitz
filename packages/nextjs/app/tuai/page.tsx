@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import type { NextPage } from "next";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { AdminPanel } from "~~/components/tuai/AdminPanel";
@@ -229,4 +228,4 @@ const TuaiPage: NextPage = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(TuaiPage), { ssr: false });
+export default TuaiPage;
