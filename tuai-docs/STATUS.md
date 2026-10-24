@@ -37,6 +37,7 @@ Kolom **B** = batch.
 
 | Waktu | Task | Alasan | Aksi |
 |---|---|---|---|
+| 2026-10-24 10:45 | T13 | Saldo deployer `0x0548…820a` = **0 MON**; butuh ±0,83 MON (base fee 100 gwei × 8,25 jt gas) | Kirim **0,9–1 MON** ke alamat deployer, lalu jalankan T13 |
 | | | | |
 
 ## Gate log
