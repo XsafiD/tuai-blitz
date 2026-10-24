@@ -487,10 +487,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1792778965217.json",
+      deploymentFile: "run-1792813381730.json",
       deploymentScript: "DeployTuai.s.sol",
     },
-    TuaiLite: {
+    TuaiBlitz: {
       address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
       abi: [
         {
@@ -706,7 +706,7 @@ const deployedContracts = {
             {
               name: "list",
               type: "tuple[]",
-              internalType: "struct TuaiLite.Series[]",
+              internalType: "struct TuaiBlitz.Series[]",
               components: [
                 {
                   name: "receiptNo",
@@ -1936,7 +1936,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1792778965217.json",
+      deploymentFile: "run-1792813381730.json",
       deploymentScript: "DeployTuai.s.sol",
     },
   },

@@ -3,11 +3,11 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {MockIDRX} from "../contracts/MockIDRX.sol";
-import {TuaiLite} from "../contracts/TuaiLite.sol";
+import {TuaiBlitz} from "../contracts/TuaiBlitz.sol";
 
-/// @notice T8 + T9: setup bersama dan tiga test inti Tuai Lite.
+/// @notice T8 + T9: setup bersama dan tiga test inti Tuai Blitz.
 /// @dev Angka mengikuti notes/b2-credit-layer.md (principal 120_000_000e6, bukan 120_000e6).
-contract TuaiLiteTest is Test {
+contract TuaiBlitzTest is Test {
     // --- konstanta skenario demo ---
     uint256 internal constant PRICE_PER_KG = 100_000e6; // Rp100.000 / kg
     uint256 internal constant MAX_KG = 2000; // 2.000 kg
@@ -22,7 +22,7 @@ contract TuaiLiteTest is Test {
     uint256 internal constant POOL_DEPOSIT = 500_000_000e6; // Rp500 juta
 
     MockIDRX internal idrx;
-    TuaiLite internal tuai;
+    TuaiBlitz internal tuai;
 
     address internal warehouse = makeAddr("warehouse");
     address internal farmer = makeAddr("farmer");
@@ -31,7 +31,7 @@ contract TuaiLiteTest is Test {
     function setUp() public {
         // T8 — deploy, daftarkan gudang, buat seri RESI-001.
         idrx = new MockIDRX();
-        tuai = new TuaiLite(address(idrx));
+        tuai = new TuaiBlitz(address(idrx));
 
         tuai.setWarehouse(warehouse, true);
         tuai.createSeries("RESI-001", "Kopi Arabika", "Grade 1", warehouse, PRICE_PER_KG, MAX_KG);

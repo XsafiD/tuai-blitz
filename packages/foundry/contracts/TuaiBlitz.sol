@@ -6,10 +6,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {MockIDRX} from "./MockIDRX.sol";
 
-/// @title Tuai Lite
+/// @title Tuai Blitz
 /// @notice Resi gudang sebagai ERC1155 + pinjaman IDRX dengan jaminan resi.
 /// @dev MVP testnet. Satu user hanya boleh punya satu pinjaman aktif.
-contract TuaiLite is ERC1155, Ownable, ReentrancyGuard {
+contract TuaiBlitz is ERC1155, Ownable, ReentrancyGuard {
     // --- konstanta (jangan diubah) ---
     uint256 public constant MAX_LTV_BPS = 6000; // 60%
     uint256 public constant LIQ_THRESHOLD_BPS = 8000; // 80%
