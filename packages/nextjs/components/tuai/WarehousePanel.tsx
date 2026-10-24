@@ -178,7 +178,14 @@ export const WarehousePanel = ({ focus }: { focus?: SeriesWithId }) => {
           </Field>
         </div>
         {focus && !isMine && (
-          <span className="t-dim">Seri ini milik gudang lain — hanya gudangnya yang bisa mint.</span>
+          <span className="t-dim" style={{ color: "#FCD34D" }}>
+            Seri ini milik gudang {focus.warehouse} — sambungkan wallet itu untuk menokenisasi.
+          </span>
+        )}
+        {farmer && !validAddr(farmer) && (
+          <span className="t-dim" style={{ color: "#FCA5A5" }}>
+            Alamat petani tidak valid.
+          </span>
         )}
         <ActionButton
           label="Tokenisasi"

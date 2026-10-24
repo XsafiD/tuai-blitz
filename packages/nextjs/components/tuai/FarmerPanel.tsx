@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ActionButton, Field, LtvBar, Row, SeriesWithId, Stat, StatusPill, useListings, useMyKg } from "./common";
 import { formatBps, formatIDR, formatKg, formatNum, liquidationPrice, loanStatus, toIDRX } from "./lib";
 import { useTuai } from "./useTuai";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const MAX_LTV_BPS = 6000n;
 
@@ -24,6 +24,13 @@ export const FarmerPanel = ({ focus, series }: { focus?: SeriesWithId; series: S
     contractName: "MockIDRX",
     functionName: "balanceOf",
     args: [address],
+  });
+  // Dana bebas pool = saldo IDRX kontrak; borrow revert "pool insufficient" kalau kurang.
+  const { data: tuaiInfo } = useDeployedContractInfo({ contractName: "TuaiBlitz" });
+  const { data: poolCash } = useScaffoldReadContract({
+    contractName: "MockIDRX",
+    functionName: "balanceOf",
+    args: [tuaiInfo?.address],
   });
   const [, loanKg, principal, debt, loanActive] = (loan ?? [0n, 0n, 0n, 0n, false]) as readonly [
     bigint,
@@ -102,12 +109,20 @@ export const FarmerPanel = ({ focus, series }: { focus?: SeriesWithId; series: S
               {freeKg === 0n ? (
                 <span className="t-dim">Belum ada token. Gudang perlu menokenisasi resi dulu.</span>
               ) : (
-                <ActionButton
-                  label="Pinjam"
-                  pending={pending}
-                  disabled={!focus || kg === 0n || kg > freeKg}
-                  onClick={() => run("Pinjam", () => writeTuai({ functionName: "borrow", args: [focus!.id, kg] }))}
-                />
+                <>
+                  {poolCash !== undefined && receive > poolCash && (
+                    <span className="t-dim" style={{ color: "#FCD34D" }}>
+                      Dana pool tersedia {formatIDR(poolCash)} — kurang dari {formatIDR(receive)}. Investor perlu setor
+                      ke pool dulu (tab Investor).
+                    </span>
+                  )}
+                  <ActionButton
+                    label="Pinjam"
+                    pending={pending}
+                    disabled={!focus || kg === 0n || kg > freeKg || (poolCash !== undefined && receive > poolCash)}
+                    onClick={() => run("Pinjam", () => writeTuai({ functionName: "borrow", args: [focus!.id, kg] }))}
+                  />
+                </>
               )}
             </>
           )}
@@ -150,6 +165,12 @@ export const FarmerPanel = ({ focus, series }: { focus?: SeriesWithId; series: S
             </Field>
           </div>
           <Row k="Total ditawarkan">{formatIDR(BigInt(sellKg || 0) * toIDRX(sellPriceRp || 0))}</Row>
+          {focus && BigInt(sellKg || 0) > freeKg && (
+            <span className="t-dim" style={{ color: "#FCD34D" }}>
+              Token bebas seri #{focus.id.toString()} di wallet ini {formatNum(freeKg)} kg
+              {freeKg === 0n ? " — gudang belum menokenisasi ke alamat ini, atau token sedang dijaminkan." : "."}
+            </span>
+          )}
           <ActionButton
             label="Pasang listing"
             pending={pending}
