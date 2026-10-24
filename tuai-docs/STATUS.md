@@ -20,8 +20,8 @@ Kolom **B** = batch.
 | T9 | Tiga test inti | P0 | B3 | [x] | borrow 60% / repay / likuidasi 80k→false, 70k→true; semua assert PASS (`ab60b06`) |
 | T10 | `forge test` | P0 | B3 | [x] | **4 lulus, 0 gagal, 0 skip**; **ABI BEKU** (`ab60b06`) |
 | T11 | Deploy script | P0 | B4 | [x] | `script/DeployTuai.s.sol`; deploy lokal sukses, `MockIDRX`+`TuaiBlitz` ter-generate (`6da9c8a`) |
-| T12 | Wallet & config | P0 | B4 | [ ] | keystore `tuai-deployer` = `0x0548…820a` dibuat; saldo **0 MON**; burner browser belum diimpor |
-| T13 | Deploy testnet | P0 | B4 | [ ] | simulasi chain 10143 OK; menunggu dana **±0,83 MON** (base fee 100 gwei) |
+| T12 | Wallet & config | P0 | B4 | [x] | keystore `tuai-deployer` = `0x0548…820a`; di-fund 1 MON; deploy testnet sukses |
+| T13 | Deploy testnet | P0 | B4 | [x] | **MockIDRX**: `0xEAa62e5E56762216eC3750eaC7c0516F71a98052` · **TuaiBlitz**: `0xcb69deB7Db12C64943D105098d51654650e50185` · sisa 0,154 MON |
 | T14 | Halaman baca seri | P0 | B5 | [ ] | `app/tuai/page.tsx` |
 | T15 | Aksi tulis | P0 | B5 | [ ] | |
 | T16 | Format & warna LTV | P0 | B5 | [ ] | |
@@ -37,7 +37,7 @@ Kolom **B** = batch.
 
 | Waktu | Task | Alasan | Aksi |
 |---|---|---|---|
-| 2026-10-24 10:45 | T13 | Saldo deployer `0x0548…820a` = **0 MON**; butuh ±0,83 MON (base fee 100 gwei × 8,25 jt gas) | Kirim **0,9–1 MON** ke alamat deployer, lalu jalankan T13 |
+| 2026-10-24 10:45 | T13 | Saldo deployer `0x0548…820a` = **0 MON**; butuh ±0,83 MON | Difund 1 MON → deploy sukses 11:28 WIB |
 | | | | |
 
 ## Gate log
@@ -52,6 +52,7 @@ Kolom **B** = batch.
 | B1 | anvil + cast: `createSeries`/`mintReceipt`/`setPrice` | PASS (`seriesIds[0]=1`, `mintedKg=2000`, over-issuance & non-warehouse revert, `PriceUpdated` log) | 2026-10-24 00:46 |
 | B2 | `forge build` + angka principal | PASS (0 error; 2.000 kg → **120_000_000e6** = Rp120 jt; 32 cek cast di anvil) | 2026-10-24 00:58 |
 | B3 | `forge test -vv` 3/3 | PASS (3 inti + 1 bawaan = **4 lulus**, 0 gagal, 0 skip) | 2026-10-24 01:0x |
+| B4 | 2 alamat di explorer | PASS (MockIDRX + TuaiBlitz terlihat di testnet.monadexplorer.com) | 2026-10-24 11:28 |
 | B4 | 2 alamat di explorer | belum | |
 | B5 | alur UI end-to-end | belum | |
 | B6 | video laptop + cloud | belum | |
@@ -66,8 +67,8 @@ Kolom **B** = batch.
 
 ```
 Network : Monad Testnet (10143)
-MockIDRX: - (belum deploy)
-TuaiBlitz: - (belum deploy)
+MockIDRX: 0xEAa62e5E56762216eC3750eaC7c0516F71a98052
+TuaiBlitz: 0xcb69deB7Db12C64943D105098d51654650e50185
 Deployer: 0x0548b15Fc15eC4779ad1E766aa3c93C827AB820a
-Waktu   : -
+Waktu   : 2026-10-24 11:28 WIB
 ```
