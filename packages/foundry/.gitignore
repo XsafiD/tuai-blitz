@@ -2,9 +2,9 @@
 cache/
 out/
 
-# Ignores development broadcast logs
-/broadcast/*/31337/
+# Ignores development broadcast logs (dry-run only, keep testnet deployments)
 /broadcast/**/dry-run/
+/broadcast/*/31337/
 
 # Docs
 docs/
