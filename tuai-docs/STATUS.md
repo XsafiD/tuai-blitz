@@ -35,7 +35,7 @@ Kolom **B** = batch.
 | T24 | `docHash` + gudang boleh `createSeries` | P0 | B7 | [x] | `createSeries(receiptNo, commodity, grade, docHash, warehouse, price, maxKg)`; owner atau gudang (untuk dirinya); `docHash` ≠ 0 |
 | T25 | Pasar per kg (`listForSale`/`buy`/`cancelListing`, fee 0,5% → pool) | P0 | B7 | [x] | + `getListings()`, `TRADE_FEE_BPS=50`; escrow tanpa `setApprovalForAll`; beli sebagian OK |
 | T26 | Test v2 (docHash, beli per kg, partial, cancel) + 4 lama | P0 | B7 | [x] | **9 lulus**, 0 gagal, 0 skip → **ABI FINAL**; optimizer ON (200 runs): runtime 28,9 KB → 16,6 KB |
-| T27 | Redeploy testnet + `deployedContracts.ts` chain 10143 | P0 | B8 | [ ] | deploy 11:28 usang; saldo 7,154 MON (cek 2026-10-24) |
+| T27 | Redeploy testnet + `deployedContracts.ts` chain 10143 | P0 | B8 | [x] | **MockIDRX**: `0xd6463…80b6` · **TuaiBlitz**: `0x4c35…0B2B`; sisa 6,58 MON |
 | T28 | Verifikasi kontrak di explorer | P0 | B8 | [ ] | |
 | T29 | Live URL (Vercel) | P0 | B9 | [ ] | URL: ____ |
 | T30 | README submit | P0 | B9 | [ ] | repo, alamat, live URL, verified, model bisnis |
@@ -66,7 +66,7 @@ Kolom **B** = batch.
 | B5 | alur UI end-to-end | belum | |
 | B6 | video laptop + cloud | belum | |
 | B7 | `forge test` kontrak v2 | PASS (9/9; simulasi deploy 10143 OK, gas 5,58 jt ≈ ≤1,12 MON) | 2026-10-24 11:5x |
-| B8 | redeploy + verified | belum | |
+| B8 | redeploy + verified | PASS (2 alamat baru v2) | 2026-10-24 12:07 |
 | B9 | live URL + README + submit | belum | |
 
 **Koreksi angka (B2):** `BATCH-PLAN` menulis principal `120_000e6`. Aritmetika sebenarnya `2000 × 100_000e6 × 6000/10000 = 120_000_000e6` (Rp120 juta) — angka di dokumen kurang 1000×. Dipakai angka benar agar konsisten dengan target demo T20 (jaminan Rp200 jt, pinjaman Rp120 jt, LTV 61%). Rincian + implikasi B3: `notes/b2-credit-layer.md`.
@@ -79,9 +79,9 @@ Kolom **B** = batch.
 
 ```
 Network : Monad Testnet (10143)
-MockIDRX: 0xEAa62e5E56762216eC3750eaC7c0516F71a98052
-TuaiBlitz: 0xcb69deB7Db12C64943D105098d51654650e50185
+MockIDRX: 0xd6463A40844d535c10a0AF85FDC09144D17b80b6
+TuaiBlitz: 0x4c35241BBbdD33FfAD0C3d9928bC8607F0560B2B
 Deployer: 0x0548b15Fc15eC4779ad1E766aa3c93C827AB820a
-Waktu   : 2026-10-24 11:28 WIB
-Catatan : versi v1 — USANG setelah B7, akan diganti di T27
+Waktu   : 2026-10-24 12:07 WIB
+Catatan : versi v2 — docHash + pasar per kg (T27)
 ```
