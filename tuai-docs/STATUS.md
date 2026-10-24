@@ -22,9 +22,9 @@ Kolom **B** = batch.
 | T11 | Deploy script | P0 | B4 | [x] | `script/DeployTuai.s.sol`; deploy lokal sukses, `MockIDRX`+`TuaiBlitz` ter-generate (`6da9c8a`) |
 | T12 | Wallet & config | P0 | B4 | [x] | keystore `tuai-deployer` = `0x0548…820a`; di-fund 1 MON; deploy testnet sukses |
 | T13 | Deploy testnet | P0 | B4 | [x] | **MockIDRX**: `0xEAa62e5E56762216eC3750eaC7c0516F71a98052` · **TuaiBlitz**: `0xcb69deB7Db12C64943D105098d51654650e50185` · sisa 0,154 MON |
-| T14 | Halaman baca seri | P0 | B5 | [ ] | `app/tuai/page.tsx` |
-| T15 | Aksi tulis | P0 | B5 | [ ] | |
-| T16 | Format & warna LTV | P0 | B5 | [ ] | |
+| T14 | Halaman baca seri | P0 | B5 | [x] | `app/tuai/page.tsx` + `components/tuai/*`; style dari `docs.lokal/Lumbung UI.html` (board "Tuai Lite · halaman demo"): gelap + lime, Geist, kartu resi kertas, chip langkah; `/` → redirect `/tuai`; `targetNetworks` hanya `monadTestnet` |
+| T15 | Aksi tulis | P0 | B5 | [x] | Gudang: createSeries (+docHash dari file) & mint · Petani: borrow/repay/listForSale/cancel · Investor: faucet/buy/deposit/withdraw · Admin: setPrice (preset 100k/80k/70k + slider), liquidate, setWarehouse; approve IDRX otomatis; log tx → explorer. **Belum diuji klik end-to-end di wallet** |
+| T16 | Format & warna LTV | P0 | B5 | [x] | `formatIDR`, bar LTV 3 zona (aman <70, waspada 70–80, likuidasi ≥80 sesuai design + ambang kontrak), harga likuidasi/kg |
 | T17 | Panel lender | P1 | B5 | [ ] | skip kalau > 30 m |
 | T18 | Event feed | P1 | B5 | [ ] | skip kalau > 30 m |
 | T19 | `sellSeized` | P2 | B2 | [ ] | dilewati — P2; **digantikan T25** (pasar per kg) |

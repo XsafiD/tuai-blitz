@@ -1,0 +1,244 @@
+/* Design system "Lumbung UI" — docs.lokal/Lumbung UI.html (board "Tuai Lite · halaman demo"). */
+.tuai {
+  --t-bg: #0a0d0b;
+  --t-card: #121714;
+  --t-line: rgba(255, 255, 255, 0.08);
+  --t-line-2: rgba(255, 255, 255, 0.14);
+  --t-text: #eef2ef;
+  --t-muted: #a3ada7;
+  --t-dim: #8c978f;
+  --t-lime: #b8f35a;
+  --t-lime-hi: #cbff73;
+  --t-good: #6ee7a0;
+  --t-warn: #fcd34d;
+  --t-bad: #fca5a5;
+  min-height: 100vh;
+  background: var(--t-bg);
+  color: var(--t-text);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.tuai a {
+  color: var(--t-lime);
+}
+.tuai a:hover {
+  color: #d4ff8a;
+}
+.tuai .t-btn,
+.tuai .t-btn2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tuai .t-btn {
+  min-height: 48px;
+  padding: 0 24px;
+  background: var(--t-lime);
+  color: var(--t-bg);
+  font-weight: 600;
+  font-size: 15px;
+  border: 0;
+}
+.tuai .t-btn:hover:not(:disabled) {
+  background: var(--t-lime-hi);
+}
+.tuai .t-btn2 {
+  min-height: 44px;
+  padding: 0 20px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--t-text);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid var(--t-line-2);
+}
+.tuai .t-btn2:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+.tuai .t-danger {
+  background: #f87171;
+  color: var(--t-bg);
+}
+.tuai .t-danger:hover:not(:disabled) {
+  background: #fca5a5;
+}
+.tuai .t-btn:disabled,
+.tuai .t-btn2:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.tuai .t-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--t-good);
+  font-weight: 600;
+  font-size: 14px;
+}
+.tuai .t-num {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.tuai .t-lbl {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+  font-weight: 500;
+}
+.tuai .t-card {
+  background: var(--t-card);
+  border: 1px solid var(--t-line);
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.tuai .t-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.tuai .t-muted {
+  color: var(--t-muted);
+}
+.tuai .t-dim {
+  color: var(--t-dim);
+  font-size: 13px;
+}
+.tuai .t-h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+.tuai .t-well {
+  background: var(--t-bg);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tuai .t-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--t-bg);
+  border: 1px solid var(--t-line-2);
+  color: var(--t-text);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tuai .t-input:focus {
+  outline: 2px solid rgba(184, 243, 90, 0.5);
+  outline-offset: 1px;
+}
+.tuai .t-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--t-muted);
+}
+.tuai .t-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+.tuai .t-tab {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 0;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--t-muted);
+  font-weight: 500;
+}
+.tuai .t-tab[aria-selected="true"] {
+  background: var(--t-text);
+  color: var(--t-bg);
+  font-weight: 600;
+}
+.tuai .t-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+.tuai .t-grid > * {
+  flex: 1 1 380px;
+}
+.tuai .t-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.tuai .t-alert {
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--t-warn);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+/* Kartu dokumen resi (kertas) */
+.tuai .t-paper {
+  background: #ede6d6;
+  color: #2a2418;
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tuai .t-paper .t-k {
+  color: #6b5d43;
+  font-size: 12px;
+}
+.tuai .t-stamp {
+  border: 2px solid #3e6410;
+  color: #3e6410;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transform: rotate(-6deg);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .tuai .t-card,
+  .tuai .t-paper {
+    padding: 20px;
+  }
+}
+/* Tombol connect wallet (daisyUI btn-primary dari Scaffold-ETH) ikut warna aksen */
+.tuai .btn-primary {
+  background: var(--t-lime);
+  color: var(--t-bg);
+  border: 0;
+  border-radius: 999px;
+  min-height: 40px;
+  font-family: inherit;
+}
