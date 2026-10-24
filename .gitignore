@@ -21,6 +21,4 @@ node_modules
 
 # cli
 dist
-# foundry broadcast artifacts (generated)
-broadcast/
 

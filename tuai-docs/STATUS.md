@@ -35,8 +35,8 @@ Kolom **B** = batch.
 | T24 | `docHash` + gudang boleh `createSeries` | P0 | B7 | [x] | `createSeries(receiptNo, commodity, grade, docHash, warehouse, price, maxKg)`; owner atau gudang (untuk dirinya); `docHash` ≠ 0 |
 | T25 | Pasar per kg (`listForSale`/`buy`/`cancelListing`, fee 0,5% → pool) | P0 | B7 | [x] | + `getListings()`, `TRADE_FEE_BPS=50`; escrow tanpa `setApprovalForAll`; beli sebagian OK |
 | T26 | Test v2 (docHash, beli per kg, partial, cancel) + 4 lama | P0 | B7 | [x] | **9 lulus**, 0 gagal, 0 skip → **ABI FINAL**; optimizer ON (200 runs): runtime 28,9 KB → 16,6 KB |
-| T27 | Redeploy testnet + `deployedContracts.ts` chain 10143 | P0 | B8 | [x] | **MockIDRX**: `0xd6463…80b6` · **TuaiBlitz**: `0x4c35…0B2B`; sisa 6,58 MON |
-| T28 | Verifikasi kontrak di explorer | P0 | B8 | [ ] | |
+| T27 | Redeploy testnet + `deployedContracts.ts` chain 10143 | P0 | B8 | [x] | **MockIDRX**: `0xd6463…80b6` · **TuaiBlitz**: `0x4c35…0B2B`; sisa 6,58 MON; blok 10143 di `deployedContracts.ts` ditambahkan manual dari `deployments/10143.json` + ABI `out/` (`broadcast/` di-ignore); blok 31337 masih ABI v1 → regenerate saat `yarn deploy` lokal |
+| T28 | Verifikasi kontrak di explorer | P0 | B8 | [x] | Sourcify Monad (blockvision): MockIDRX matchId 2058153, TuaiBlitz 2058154 — creation + runtime **full match** |
 | T29 | Live URL (Vercel) | P0 | B9 | [ ] | URL: ____ |
 | T30 | README submit | P0 | B9 | [ ] | repo, alamat, live URL, verified, model bisnis |
 | T31 | Submit | P0 | B9 | [ ] | **≤ 16:30** (lock 16:45) |
@@ -66,7 +66,7 @@ Kolom **B** = batch.
 | B5 | alur UI end-to-end | belum | |
 | B6 | video laptop + cloud | belum | |
 | B7 | `forge test` kontrak v2 | PASS (9/9; simulasi deploy 10143 OK, gas 5,58 jt ≈ ≤1,12 MON) | 2026-10-24 11:5x |
-| B8 | redeploy + verified | PASS (2 alamat baru v2) | 2026-10-24 12:07 |
+| B8 | redeploy + verified | PASS — redeploy 12:07 (2 alamat v2, bytecode = build lokal); verified Sourcify full match 12:37 | 2026-10-24 12:37 |
 | B9 | live URL + README + submit | belum | |
 
 **Koreksi angka (B2):** `BATCH-PLAN` menulis principal `120_000e6`. Aritmetika sebenarnya `2000 × 100_000e6 × 6000/10000 = 120_000_000e6` (Rp120 juta) — angka di dokumen kurang 1000×. Dipakai angka benar agar konsisten dengan target demo T20 (jaminan Rp200 jt, pinjaman Rp120 jt, LTV 61%). Rincian + implikasi B3: `notes/b2-credit-layer.md`.

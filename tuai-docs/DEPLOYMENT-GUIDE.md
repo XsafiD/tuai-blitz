@@ -10,6 +10,26 @@ Setiap developer punya private key sendiri → bisa deploy kapan saja tanpa shar
 - Bisa deploy dari komputer mana saja
 - Lebih aman untuk tim
 
+## Aturan utama: satu deployment kanonik
+
+Setiap deploy = **kontrak baru** dengan owner = deployer-nya. Tiga orang deploy sendiri-sendiri = tiga kontrak terpisah (data, admin, pool beda). Karena itu:
+
+- Tim memakai **satu** deployment untuk frontend & demo — alamat di `STATUS.md` §Alamat deployment.
+- Deploy ulang hanya kalau **kontrak berubah**, dan diumumkan dulu di grup.
+- Fungsi admin (`setPrice`, `setWarehouse`) hanya bisa dipanggil **owner deployment kanonik**. Developer lain minta owner menjalankan `setWarehouse(<alamatnya>, true)` kalau perlu peran gudang.
+
+### Setelah deploy testnet — wajib commit 3 hal
+
+```bash
+git add packages/foundry/deployments/10143.json \
+        packages/foundry/broadcast/DeployTuai.s.sol/10143/run-*.json \
+        packages/nextjs/contracts/deployedContracts.ts
+```
+
+`deployedContracts.ts` di-generate dari folder `broadcast/`. Kalau file broadcast 10143 tidak di-commit, developer lain yang menjalankan `yarn deploy` lokal (anvil) akan **menghapus blok 10143** dari `deployedContracts.ts` saat generate ulang. File broadcast aman di-commit: data sensitif disimpan foundry di `cache/`, bukan di `broadcast/`. Folder `dry-run/` dan chain `31337` tetap di-ignore (`packages/foundry/.gitignore`).
+
+**Jangan commit** `deployedContracts.ts` hasil `yarn deploy` lokal kalau blok `10143` hilang — cek dulu `git diff`.
+
 ## Setup per Developer
 
 ### 1. Buat keystore lokal (sekali saja)
@@ -52,9 +72,24 @@ HOME="$TUAIBLITZ_ROOT/.tools/home" \
   forge script packages/foundry/script/DeployTuai.s.sol \
   --rpc-url https://testnet-rpc.monad.xyz \
   --account dev-<nama> \
-  --password <password-keystore> \
   --broadcast --legacy --ffi
+# password ditanya interaktif — jangan pakai --password (tersimpan di history shell)
 ```
+
+### 4. Verifikasi kontrak (tanpa private key)
+
+```bash
+cd packages/foundry
+forge verify-contract <alamat MockIDRX> contracts/MockIDRX.sol:MockIDRX \
+  --chain 10143 --verifier sourcify --verifier-url https://sourcify-api-monad.blockvision.org
+forge verify-contract <alamat TuaiBlitz> contracts/TuaiBlitz.sol:TuaiBlitz \
+  --chain 10143 --constructor-args $(cast abi-encode "c(address)" <alamat MockIDRX>) \
+  --verifier sourcify --verifier-url https://sourcify-api-monad.blockvision.org
+```
+
+### Windows (tanpa `.tools/`)
+
+Path `$TUAIBLITZ_ROOT/.tools` hanya ada di mesin Linux dev 1. Di Windows: pasang Foundry v1.8.6 (zip `foundry_v1.8.6_win32_amd64.zip` dari GitHub release, ekstrak ke `C:\Users\<user>\.foundry\bin`, tambahkan ke PATH), `yarn install` di root, lalu jalankan perintah di atas tanpa prefix `HOME=...`.
 
 ## Koordinasi Tim
 
@@ -141,8 +176,8 @@ Developer B:
 
 | Developer | Nama Keystore | Alamat | Status |
 |-----------|---------------|--------|--------|
-| Xsafi | tuai-deployer | 0x0548b15Fc15eC4779ad1E766aa3c93C827AB820a | Aktif (7 MON) |
-| | | | |
+| Xsafi (dev 1) | tuai-deployer | 0x0548b15Fc15eC4779ad1E766aa3c93C827AB820a | Aktif — **owner deployment kanonik v2** (6,58 MON) |
+| Haidar (dev 2) | dev-haidar | _(isi setelah `yarn account:generate`)_ | Belum |
 | | | | |
 
 Tambahkan baris untuk setiap developer yang join.
