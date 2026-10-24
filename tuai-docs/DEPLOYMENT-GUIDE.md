@@ -177,7 +177,7 @@ Developer B:
 | Developer | Nama Keystore | Alamat | Status |
 |-----------|---------------|--------|--------|
 | Xsafi (dev 1) | tuai-deployer | 0x0548b15Fc15eC4779ad1E766aa3c93C827AB820a | Aktif — **owner deployment kanonik v2** (6,58 MON) |
-| Haidar (dev 2) | dev-haidar | _(isi setelah `yarn account:generate`)_ | Belum |
+| Haidar (dev 2) | dev-haidar | 0xAf5764db02839644D22ae11b968F65bFdCa0C0fa | Keystore dibuat (Windows); saldo 0 MON — menunggu dana dari dev 1 |
 | | | | |
 
 Tambahkan baris untuk setiap developer yang join.
