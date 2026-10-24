@@ -9,7 +9,122 @@ Total estimasi realistis: **± 7 jam** (5 jam 15 murni + buffer). Kalau mulai 00
 
 ---
 
-## 1. Ringkasan batch
+## 0. REVISI 2026-10-24 — selaraskan dengan "Tuai Blitz Checklist" acara
+
+> **Bagian ini menggantikan §1–§3 untuk sisa pekerjaan.** §1–§8 di bawah tetap disimpan sebagai riwayat B0–B4.
+> Sumber: `Tuai Blitz Checklist.md` (Monad Blitz Jogja vol.2). **Submit ≤ 16:30**, lock 16:45.
+
+### 0.1 Hasil audit terhadap checklist
+
+| Poin checklist | Status sekarang | Tindakan |
+|---|---|---|
+| Gudang terdaftar terbitkan resi (komoditas, kg, **hash dokumen**) | ⚠️ tidak ada `docHash`; `createSeries` hanya `onlyOwner` | **T24** |
+| Resi = token pecahan per kg milik petani | ✅ ERC1155, 1 token = 1 kg | — |
+| Petani pinjam instan, LTV maks 60% | ✅ diuji | — |
+| **Investor beli pecahan per kg** | ❌ hanya pool `deposit` (investor = lender, bukan pembeli kg) | **T25** |
+| Harga oracle admin → likuidasi | ✅ diuji | — |
+| Sudut Monad: "simulasi 30 investor" | ❌ | **T32** (bonus) |
+| Live URL | ❌ frontend belum ada | B5 + **T29** |
+| Tx terlihat di explorer | ❌ UI belum ada | T15 (link hash) |
+| Kontrak **verified** | ❌ | **T28** |
+| Repo + contract address di README | ❌ README masih bawaan Scaffold-ETH | **T30** |
+| Deploy **selama acara** | ⚠️ deploy 11:28 versi lama | redeploy **T27** (wajib karena ABI berubah) |
+| Key tidak ditempel ke AI | ✅ keystore `tuai-deployer` | jalankan deploy sendiri |
+
+**Konsekuensi:** keputusan "ABI BEKU" di B3 **dicabut satu kali** untuk T24 + T25. Setelah B7 hijau → ABI beku lagi (final). Alamat 11:28 (`0xcb69…0185`) dianggap **usang**, jangan dipakai di UI/README.
+
+### 0.2 Urutan prioritas (kerjakan dari atas, jangan lompat)
+
+| # | ID | Task | P | Batch | Estimasi |
+|---|---|---|---|---|---|
+| 1 | T24 | `docHash` di `Series` + gudang terdaftar boleh `createSeries` | P0 | B7 | 15 m |
+| 2 | T25 | Pasar per kg: `listForSale` / `buy` / `cancelListing` + fee jual-beli | P0 | B7 | 35 m |
+| 3 | T26 | Test baru + 4 test lama tetap hijau | P0 | B7 | 25 m |
+| 4 | T27 | Redeploy testnet + generate `deployedContracts.ts` chain 10143 | P0 | B8 | 15 m |
+| 5 | T28 | Verifikasi kedua kontrak di explorer | P0 | B8 | 15 m |
+| 6 | T14–T16 | Frontend 4 panel (Gudang, Petani, **Investor**, Admin) + link tx | P0 | B5 | 100 m |
+| 7 | T29 | Deploy frontend ke Vercel → live URL | P0 | B9 | 20 m |
+| 8 | T20–T21 | Seed demo + uji alur penuh **sesuai urutan demo 3 menit** | P0 | B6 | 30 m |
+| 9 | T30 | README submit (deskripsi, alamat, live URL, link verified, model bisnis) | P0 | B9 | 15 m |
+| 10 | T22–T23 | Rekaman cadangan + latihan pitch 3 menit | P0 | B6 | 40 m |
+| 11 | T31 | **Submit ≤ 16:30** | P0 | B9 | 5 m |
+| 12 | T32 | Tombol "simulasi 30 investor" | P1 | B10 | 30 m |
+| 13 | T17 / T18 | Panel lender detail / event feed | P2 | — | — |
+| 14 | T19 | `sellSeized` (jual jaminan sitaan) — digantikan T25 | P2 | — | — |
+
+**Aturan potong waktu:** kalau jam 15:00 B5 belum hijau → stop fitur, langsung T29 + T30 + T22 dengan apa yang jalan. T32 hanya dikerjakan kalau T21 sudah lulus.
+
+### 0.3 Batch baru
+
+```
+B7 (kontrak v2) ──> B8 (redeploy + verify) ──> B5 (frontend) ──> B9 (live URL + README) ──> B6 (demo) ──> submit
+                                                                                     └──> B10 (bonus, opsional)
+```
+
+#### B7 — Kontrak v2 (T24, T25, T26) · 75 m
+
+File: `packages/foundry/contracts/TuaiBlitz.sol`, `packages/foundry/test/TuaiBlitz.t.sol`.
+
+- **T24**
+  - `Series` tambah `bytes32 docHash` (hash PDF/scan resi fisik).
+  - `createSeries(receiptNo, commodity, grade, docHash, warehouse, pricePerKg, maxKg)`.
+  - Akses: `owner` **atau** `isWarehouse[msg.sender]`; kalau pemanggil gudang, `warehouse` wajib = `msg.sender`.
+  - `SeriesCreated` tambah `docHash`.
+- **T25** pasar sekunder per kg (escrow di kontrak, tidak butuh `setApprovalForAll` karena kontrak = token):
+  - `struct Listing { address seller; uint256 seriesId; uint256 kgLeft; uint256 pricePerKg; bool active; }`
+  - `listForSale(seriesId, kg, pricePerKg) returns (listingId)` → `_safeTransferFrom(msg.sender, address(this), …)`.
+  - `buy(listingId, kg)` → pembeli bayar `kg × pricePerKg` IDRX; `TRADE_FEE_BPS = 50` (0,5%) masuk **pool** (menaikkan `totalAssets` → yield lender = model bisnis on-chain); sisa ke penjual; token kg ke pembeli. Boleh beli sebagian.
+  - `cancelListing(listingId)` → sisa kg kembali ke penjual.
+  - `getListings()` view untuk UI.
+  - Event `Listed`, `Bought`, `ListingCancelled`.
+  - Catatan: kg yang sedang di-listing **tidak** bisa dijadikan jaminan (sudah di escrow) — wajar.
+- **T26** test: `testCreateSeriesStoresDocHash`, `testWarehouseCanCreateOwnSeries`, `testBuyPerKgPaysSellerAndFee`, `testPartialBuyAndCancel`, + 4 test lama.
+
+**Gate B7:** `forge test -vv` → semua lulus, 0 skip. Setelah ini **ABI FINAL**.
+
+**Angka tetap:** `MAX_LTV_BPS=6000`, `LIQ_THRESHOLD_BPS=8000`, `INTEREST_BPS=200`, IDRX 6 desimal, kg bulat.
+
+#### B8 — Redeploy + verify (T27, T28) · 30 m
+
+- Saldo deployer 7,15 MON (cek 2026-10-24) — cukup (deploy ±0,85 MON @100 gwei).
+- `yarn deploy --network monadTestnet` (**dijalankan sendiri**, keystore `tuai-deployer`). Pastikan `deployments/10143.json` **dan** `packages/nextjs/contracts/deployedContracts.ts` memuat chain 10143 → commit keduanya.
+- Setelah deploy, jalankan dari wallet deployer: `setWarehouse(<burner gudang>, true)` + faucet IDRX + `deposit` ke pool (atau masuk T20).
+- **T28** verifikasi (Sourcify/explorer Monad, lihat `script/VerifyAll.s.sol` / `yarn verify --network monadTestnet`). Bukti: centang hijau di testnet.monadexplorer.com.
+
+**Gate B8:** 2 alamat baru verified di explorer + `STATUS.md` §Alamat diperbarui.
+
+#### B5 — Frontend (T14, T15, T16) · 100 m — **direvisi**
+
+Tab jadi: **Gudang** (buat seri + `docHash` dari upload file → `keccak256`, mint ke petani) · **Petani** (pinjam, lunasi, LTV berwarna, jual kg via `listForSale`) · **Investor** (daftar listing, beli per kg, faucet IDRX, deposit pool) · **Admin** (slider harga, likuidasi).
+Setiap aksi tulis menampilkan hash yang bisa diklik → `https://testnet.monadexplorer.com/tx/<hash>`.
+`scaffold.config.ts`: saat demo `targetNetworks` hanya `monadTestnet`.
+
+**Gate B5:** jalan penuh di browser sesuai urutan demo: buat seri → mint → pinjam → listing → investor beli → harga 70k → likuidasi.
+
+#### B9 — Live URL + README + submit (T29, T30, T31) · 40 m
+
+- **T29** Vercel (`yarn vercel` / import repo, root `packages/nextjs`). Domain `*.vercel.app` cukup (domain sendiri memang ditunda).
+- **T30** README root ditulis ulang: masalah, solusi satu kalimat, fitur MVP, alamat kontrak + link verified, live URL, cara jalan lokal, model bisnis (fee penerbitan, selisih bunga 2%, fee jual-beli 0,5%), yang sengaja ditunda.
+- **T31** submit ≤ 16:30.
+
+#### B6 — Demo (T20–T23) · 70 m — **direvisi**
+
+- **T20** seed: 3–4 burner (admin, gudang, petani, investor) masing-masing 0,1–0,2 MON dari deployer; pool terisi; seri `RESI-2026-001` Kopi Arabika 2.000 kg @ Rp100.000.
+- **T21** latihan alur 2× mengikuti kerangka demo:
+  1. 0:00 masalah · 0:30 solusi + buka live URL
+  2. 0:45 gudang terbitkan resi → petani pinjam Rp120 jt → petani listing 500 kg → investor beli 100 kg → tunjukkan tx di explorer
+  3. 2:00 harga 70k → likuidasi; "kenapa Monad: tx kecil per kg murah & cepat"
+  4. 2:20 model bisnis · 2:40 repo, alamat, live URL, verified
+- **T22** rekaman cadangan (laptop + cloud). **T23** latihan pitch + 3 jawaban juri.
+- Aturan acara: sebut lokasi "The Studio", minta izin orang yang masuk frame.
+
+#### B10 — Bonus Monad (T32) · 30 m — hanya jika T21 lulus
+
+Tombol "simulasi 30 investor": generate 30 burner di browser, deployer/admin kirim MON + IDRX ke masing-masing (atau satu wallet kirim 30 `buy` 1–5 kg dengan nonce manual), lalu tembak `buy` paralel; tampilkan hitungan tx terkonfirmasi + waktu total. Perhatikan gas Monad dihitung dari `gas_limit` → set gas limit wajar per tx.
+
+---
+
+## 1. Ringkasan batch (rencana awal — riwayat, lihat §0 untuk sisa)
 
 | Batch | Nama | Task | Estimasi | Gate (harus hijau) |
 |---|---|---|---|---|
